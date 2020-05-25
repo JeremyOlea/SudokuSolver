@@ -67,6 +67,11 @@ body {
   border: 1px black solid;
 }
 
+.cell-text {
+  text-align: center;
+  font-size: 150%;
+}
+
 .baby-blue {
   background-color: rgb(138,199,251)
 }
