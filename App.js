@@ -30,11 +30,12 @@ function start() {
         let cell = document.createElement('div');
         cell.classList.add('cell');
         cell.classList.add(colors[i])
+        cell.setAttribute('id', i*9+j);
+        cell.addEventListener('click', cellClicked);
         
         let textField = document.createElement('p');
         textField.classList.add('cell-text')
         textField.setAttribute('id', i + '-' + j);
-        // textField.onclick = cellClicked;
 
         cell.append(textField);
         content.append(cell)
@@ -42,6 +43,13 @@ function start() {
         grid.appendChild(content);
     }
     body.appendChild(grid);
+}
+
+function cellClicked() {
+    let id = this.id;
+    console.log("clicked cell " + id);
+    let textField = document.getElementsByTagName("P")[id];
+    textField.innerHTML = "1";
 }
 
 start();
