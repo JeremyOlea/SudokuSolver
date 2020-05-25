@@ -17,6 +17,8 @@ const colors = [
 "baby-blue", "teal", "orange", "purple", "yellow", "green", "turquoise", "pink", "blue"
 ]
 
+let currentCellId = null;
+
 function start() {
     console.log("here in app.js");
     let body = document.getElementsByTagName("BODY")[0];
@@ -46,10 +48,49 @@ function start() {
 }
 
 function cellClicked() {
+    if(currentCellId != null) {
+        document.getElementById(currentCellId).classList.remove('highlighted');
+    }
     let id = this.id;
+    this.classList.add('highlighted');
     console.log("clicked cell " + id);
-    let textField = document.getElementsByTagName("P")[id];
-    textField.innerHTML = "1";
+    currentCellId = id;
+    document.addEventListener('keypress', userInput);
+}
+
+function userInput(e) {
+    let textField = document.getElementsByTagName("P")[currentCellId];
+    switch(e.key) {
+        case "1":
+            textField.innerHTML = e.key;
+            break;
+        case "2":
+            textField.innerHTML = e.key;
+            break;
+        case "3":
+            textField.innerHTML = e.key;
+            break;
+        case "4":
+            textField.innerHTML = e.key;
+            break;
+        case "5":
+            textField.innerHTML = e.key;
+            break;
+        case "6":
+            textField.innerHTML = e.key;
+            break;
+        case "7":
+            textField.innerHTML = e.key;
+            break;
+        case "8":
+            textField.innerHTML = e.key;
+            break;
+        case "9":
+            textField.innerHTML = e.key;
+            break;
+        default:
+    }
+
 }
 
 start();
