@@ -2,8 +2,13 @@
   --size: 3;
 }
 
+body {
+  background-color: rgb(224, 241, 253);
+}
+
 .App {
   text-align: center;
+  background-color: rgb(224, 241, 253);
 }
 
 .App-logo {
@@ -33,7 +38,7 @@
 }
 
 .grid {
-  border: 5px rgb(220,220,220) solid;
+  border: 8px rgb(220,220,220) solid;
   background-color: rgb(220,220,220);
   grid-gap: 3px;
   width: 800px;
@@ -63,11 +68,39 @@
 }
 
 .baby-blue {
-  background-color: rgb(170, 197, 226)
+  background-color: rgb(138,199,251)
 }
 
 .teal {
-  background-color: rgb(181, 234, 215);
+  background-color: rgb(181,234,215);
+}
+
+.orange {
+  background-color: rgb(255,177,142);
+}
+
+.purple {
+  background-color: rgb(209,199,233);
+}
+
+.yellow {
+  background-color: rgb(254,240,152);
+}
+
+.green {
+  background-color: rgb(162,207,165);
+}
+
+.turquoise {
+  background-color: rgb(120,195,196);
+}
+
+.pink {
+  background-color: rgb(252,155,177);
+}
+
+.blue {
+  background-color: rgb(120,204,251);
 }
 
 @keyframes App-logo-spin {

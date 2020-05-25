@@ -29,13 +29,15 @@ class App extends Component {
   
   render() {
     return (
-      <div className="App">
-        <body>
-            {
-              this.createTable()
-            }
-        </body>
-      </div>
+      <p>
+        <div className="App">
+          <body>
+              {
+                this.createTable()
+              }
+          </body>
+        </div>
+      </p>
     );
   }
 }
