@@ -10,7 +10,6 @@ let board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0]
   ];
 
 let sudokuNumbers = [1,2,3,4,5,6,7,8,9];
@@ -22,7 +21,7 @@ const colors = [
 let currentCellId = null;
 
 function start() {
-    let body = document.getElementsByTagName("BODY")[0];
+    let body = document.getElementById('start');
     let grid = document.createElement('div');
     grid.classList.add('grid');
     for(let i = 0; i < 3*3; i++) { //creates 10 nested 'div' elements for the grid
@@ -30,26 +29,46 @@ function start() {
         content.classList.add('grid-block');
         
         for(let j = 0; j < 3*3; j++){
-        let cell = document.createElement('div');
-        cell.classList.add('cell');
-        cell.classList.add(colors[i])
-        cell.setAttribute('id', i*9+j);
-        cell.addEventListener('click', cellClicked);
-        
-        let textField = document.createElement('p');
-        textField.classList.add('cell-text')
-        textField.setAttribute('id', i + '-' + j);
+            let cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.classList.add(colors[i])
+            // cell.setAttribute('id', i*9+j);
+            // cell.addEventListener('click', cellClicked);
+            
+            // let textField = document.createElement('p');
+            // textField.classList.add('cell-text')
+            // textField.setAttribute('id', i + '-' + j);
 
-        cell.append(textField);
-        content.append(cell)
-
+            // cell.append(textField);
+            content.append(cell)
         }
         grid.appendChild(content);
     }
     body.appendChild(grid);
 
+    let bodyInvis = document.getElementsByTagName('BODY')[0];
+    let gridInvis = document.createElement('div');
+    gridInvis.classList.add('grid');
+    gridInvis.classList.add('invis');
+    for(let i = 0; i < 9*9; i++) {
+        let cellInvis = document.createElement('div');
+        cellInvis.classList.add('cell');
+        cellInvis.classList.add('invis-cell');
+        let textField = document.createElement('p');
+        textField.classList.add('cell-text');
+        cellInvis.setAttribute('id', i);
+        cellInvis.addEventListener('click', cellClicked);
+        cellInvis.appendChild(textField);
+        gridInvis.appendChild(cellInvis);
+    }
+    bodyInvis.appendChild(gridInvis);
+
     // Other functions
-    // printBoard();
+    generateBoard();
+}
+
+function test() {
+    console.log("test clicked");
 }
 
 function cellClicked() {
@@ -64,7 +83,8 @@ function cellClicked() {
 }
 
 function userInput(e) {
-    let textField = document.getElementsByTagName("P")[currentCellId];
+    let textField = document.getElementsByTagName('p')[currentCellId];
+    console.log("clicked text " + textField.id);
     switch(e.key) {
         case "1":
             textField.innerHTML = e.key;
@@ -99,7 +119,14 @@ function userInput(e) {
 }
 
 function generateBoard() {
+    // squareTest();
     generateCompleteBoard();
+}
+
+function squareTest() {
+    printSquareHTML(copySquare(0, 0));
+    printSquareHTML(copySquare(0, 3));
+    printSquareHTML(copySquare(0, 6));
 }
 
 function copySquare(row, col) {
@@ -113,12 +140,23 @@ function copySquare(row, col) {
     for(let i = row; i < row+3; i++) {
         for(let j = col; j < col+3; j++) {
             square[squareRow][squareCol] = board[i][j];
+            squareCol += 1;
         }
+        squareRow += 1;
+        squareCol = 0
     }
     return square;
 }
 
-function getSquare(row, col) {
+function absToRow(position) {
+    return Math.floor(position/9);
+}
+
+function absToCol(position) {
+    return position % 9;
+}
+
+function conflict(row, col, value) {
     let square = [];
     if(row < 3) {
         if(col < 3) {
@@ -153,48 +191,118 @@ function getSquare(row, col) {
             square = copySquare(6, 6);
         }
     }
-    return square;
+    
+    if(board[row].includes(value)) {
+        return true;
+    }
+
+    for(let i = 0; i < 9; i++) {
+        if(board[i][col] == value) {
+            return true;
+        }
+    }
+
+    for(let m = 0; m < square.length; m++) {
+        if(square[m].includes(value)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function printCol(row, value) {
+    for(let i = 0; i < 9; i++) {
+        if(board[row][i] == value)
+            console.log(board[row][i]);
+    }
+}
+
+function printSquare(square) {
+    for(let i = 0; i < square.length; i++) {
+        for(let j = 0; j < square[0].length; j++) {
+            console.log(square[i][j]);
+        }
+    }
 }
 
 function generateCompleteBoard() {
+    let available = [];
     for(let i = 0; i < 81; i++) {
-        let row = Math.floor(i/9);
-        let col = i % 9;
-
-        if(board[row][col] == 0) {
-            shuffle(sudokuNumbers);
-            for(let j = 0; j < sudokuNumbers.length; i++) {
-                let value = sudokuNumbers[j];
-                if(!board[row].includes(value)) {
-                    if(!board[row][0].includes(value) ||
-                    !board[row][1].includes(value) || 
-                    !board[row][2].includes(value) ||
-                    !board[row][3].includes(value) ||
-                    !board[row][4].includes(value) ||
-                    !board[row][5].includes(value) ||
-                    !board[row][6].includes(value) ||
-                    !board[row][7].includes(value) ||
-                    !board[row][8].includes(value)) 
-                    {
-                        let square = getSquare(row, col);
-                        for(let m = 0; m < square.length; m++) {
-                            if(!square[m].includes(value)) {
-                                board[row][col] = value;
-                            }
-                        }
-                    }
-                }
+        let arr = [];
+        for(let j = 1; j < 9; j++) {
+            arr.push(j);
+        }
+        available.push(arr);
+    }
+    let count = 0;
+    while(count < 81) {
+        let row = absToRow(count);
+        let col = absToCol(count);
+        if(available[count].length != 0) {
+            let rand = Math.floor((Math.random() * available[count].length));
+            let value = available[count][rand];
+            if(!conflict(row, col, value)) {
+                // console.log(row + ", " + col + " is now " + value);
+                board[row][col] = value;
+                available[count].splice(rand, 1);
+                count += 1;
+            } else {
+                available[count].splice(rand, 1);
             }
+        } else {
+            for(let num = 1; num < 10; num++) {
+                available[count].push(num);
+            }
+            let prevRow = absToRow(count - 1);
+            let prevCol = absToCol(count - 1);
+            board[prevRow][prevCol] = 0;
+            count -= 1;
+        }
+    }
+    drawBoardToScreen();
+    // printBoard();
+}
+
+function drawBoardToScreen() {
+    let cells = document.getElementsByClassName("invis-cell");
+    let cellNumber = 0;
+    for(let i = 0; i < board.length; i++) {
+        for(let j = 0; j < board[0].length; j++) {
+            let id = cells[cellNumber].id;
+            let textField = document.getElementsByTagName("P")[id];
+            textField.innerHTML = board[i][j];
+            cellNumber += 1;
         }
     }
 }
 
 function printBoard() {
+    let body = document.getElementsByTagName("BODY")[0];
     for(let i = 0; i < board.length; i++) {
+        let div = document.createElement('div');
         for(let j = 0; j < board[0].length; j++) {
-            console.log(board[i][j]);
+            div.innerHTML += board[i][j] + ' ';
+            
         }
+        div.innerHTML += '\n';
+        body.append(div);
     }
+    
+}
+
+function printSquareHTML(square) {
+    let body = document.getElementsByTagName("BODY")[0];
+    for(let i = 0; i < square.length; i++) {
+        let div = document.createElement('div');
+        for(let j = 0; j < square[0].length; j++) {
+            div.innerHTML += square[i][j] + ' ';
+            
+        }
+        div.innerHTML += '\n';
+        body.append(div);
+    }
+    
 }
 
 start();

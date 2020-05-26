@@ -51,6 +51,16 @@
     margin: auto;
     grid-template: repeat(var(--size), 1fr) / repeat(var(--size), 1fr)
   }
+
+  .invis {
+    background-color: transparent !important;
+    grid-template: repeat(9, 1fr) / repeat(9, 1fr) !important;
+  }
+
+  .invis-cell {
+    background-color: transparent !important;
+    border: 0px red solid !important;
+  }
   
   .grid-block {
     display: grid;
@@ -73,7 +83,7 @@
   }
 
   .highlighted {
-    border: 3px rgb(252,3,36) solid;
+    border: 3px rgb(252,3,36) solid !important;
   }
   
   .baby-blue {
