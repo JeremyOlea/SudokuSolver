@@ -12,7 +12,8 @@ let board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ];
 
-let sudokuNumbers = [1,2,3,4,5,6,7,8,9];
+let sudokuBoard = [];
+let numSolutions = 0;
 
 const colors = [
 "baby-blue", "teal", "orange", "purple", "yellow", "green", "turquoise", "pink", "blue"
@@ -62,6 +63,13 @@ function start() {
         gridInvis.appendChild(cellInvis);
     }
     bodyInvis.appendChild(gridInvis);
+
+    let instructions = document.getElementsByClassName('title')[0];
+    let btn = document.createElement('BUTTON'); //creates reset button
+    btn.setAttribute("id", "solve");
+    btn.addEventListener('click', solveButtonHandler);
+    btn.textContent = 'solve';
+    instructions.appendChild(btn);
 
     // Other functions
     generateBoard();
@@ -121,15 +129,28 @@ function userInput(e) {
 function generateBoard() {
     // squareTest();
     generateCompleteBoard();
+    copyBoard(board, sudokuBoard);
+    removeBoardCells();
+    drawBoardToScreen();
+    // printBoard(board);
+}
+
+function copyBoard(src, dest) {
+    for(let i = 0; i < src.length; i++) {
+        dest.push([]);
+        for(let j = 0; j < src[i].length; j++) {
+            dest[i].push(src[i][j]);
+        }
+    }
 }
 
 function squareTest() {
-    printSquareHTML(copySquare(0, 0));
-    printSquareHTML(copySquare(0, 3));
-    printSquareHTML(copySquare(0, 6));
+    printSquareHTML(copySquare(0, 0, board));
+    printSquareHTML(copySquare(0, 3, board));
+    printSquareHTML(copySquare(0, 6, board));
 }
 
-function copySquare(row, col) {
+function copySquare(row, col, src) {
     let squareRow = 0;
     let squareCol = 0;
     let square = [
@@ -139,7 +160,7 @@ function copySquare(row, col) {
     ];
     for(let i = row; i < row+3; i++) {
         for(let j = col; j < col+3; j++) {
-            square[squareRow][squareCol] = board[i][j];
+            square[squareRow][squareCol] = src[i][j];
             squareCol += 1;
         }
         squareRow += 1;
@@ -156,48 +177,48 @@ function absToCol(position) {
     return position % 9;
 }
 
-function conflict(row, col, value) {
+function conflict(row, col, value, src) {
     let square = [];
     if(row < 3) {
         if(col < 3) {
-           square = copySquare(0, 0);
+           square = copySquare(0, 0, src);
         }
         else if(col < 6) {
-            square = copySquare(0, 3);
+            square = copySquare(0, 3, src);
         }
         else if(col < 9) {
-            square = copySquare(0, 6);
+            square = copySquare(0, 6, src);
         }
     }
     else if(row < 6) {
         if(col < 3) {
-            square = copySquare(3, 0);
+            square = copySquare(3, 0, src);
         }
         else if(col < 6) {
-            square = copySquare(3, 3);
+            square = copySquare(3, 3, src);
         }
         else if(col < 9) {
-            square = copySquare(3, 6);
+            square = copySquare(3, 6, src);
         }
     }
     else if(row < 9) {
         if(col < 3) {
-            square = copySquare(6, 0);
+            square = copySquare(6, 0, src);
         }
         else if(col < 6) {
-            square = copySquare(6, 3);
+            square = copySquare(6, 3, src);
         }
         else if(col < 9) {
-            square = copySquare(6, 6);
+            square = copySquare(6, 6, src);
         }
     }
     
-    if(board[row].includes(value)) {
+    if(src[row].includes(value)) {
         return true;
     }
 
     for(let i = 0; i < 9; i++) {
-        if(board[i][col] == value) {
+        if(src[i][col] == value) {
             return true;
         }
     }
@@ -242,7 +263,7 @@ function generateCompleteBoard() {
         if(available[count].length != 0) {
             let rand = Math.floor((Math.random() * available[count].length));
             let value = available[count][rand];
-            if(!conflict(row, col, value)) {
+            if(!conflict(row, col, value, board)) {
                 // console.log(row + ", " + col + " is now " + value);
                 board[row][col] = value;
                 available[count].splice(rand, 1);
@@ -260,29 +281,143 @@ function generateCompleteBoard() {
             count -= 1;
         }
     }
+}
+
+function isBoardComplete(src) {
+    for(let i = 0; i < src.length; i++) {
+        for(let j = 0; j < src.length; j++) {
+            if(src[i][j] == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function findNumberOfSolutions(src) {
+    if(numSolutions > 1) return true;
+    let count = 0;
+    let row = 0;
+    let col = 0;
+    while(count < 81) {
+        row = absToRow(count);
+        col = absToCol(count);
+        if(src[row][col] == 0) {
+            for(let val = 1; val < 10; val++) {
+                if(!conflict(row, col, val, src)) {
+                    src[row][col] = val;
+                    if(isBoardComplete(src)) {
+                        numSolutions += 1;
+                        break;
+                    } else {
+                        if(findNumberOfSolutions(src)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        count++;
+    }
+    src[row][col] = 0;
+}
+
+function removeBoardCells() {
+    let counter = 0;
+    let attempts = 10;
+    while(attempts > 0) {
+        let row = Math.floor((Math.random() * 9));
+        let col = Math.floor((Math.random() * 9));
+        while(sudokuBoard[row][col] == 0) {
+            row = Math.floor((Math.random() * 9));
+            col = Math.floor((Math.random() * 9));
+        }
+        sudokuBoard[row][col] = 0;
+        let copyOfBoard = [];
+        copyBoard(sudokuBoard, copyOfBoard);
+        numSolutions = 0;
+        findNumberOfSolutions(copyOfBoard);
+
+        if(numSolutions != 1) {
+            sudokuBoard[row][col] = board[row][col];
+            attempts -= 1;
+        } else {
+
+        }
+    }
+}
+
+function clearBoardOfUserInput() {
+    console.log('STUB: clear board of user input');
+}
+
+function highlightSelectedCell(pos) {
+    console.log('STUB: highlight selected cell');
+}
+
+function writeCell(pos, val) {
+    console.log('STUB: write on cell');
+}
+
+function solveButtonHandler() {
+    // clearBoardOfUserInput();
+    solve();
     drawBoardToScreen();
-    // printBoard();
+}
+
+function solve() {
+    let count = 0;
+    let row = 0;
+    let col = 0;
+    while(count < 81) {
+        row = absToRow(count);
+        col = absToCol(count);
+        // highlightSelectedCell(count);
+        if(sudokuBoard[row][col] == 0) {
+            for(let val = 1; val < 10; val++) {
+                if(!conflict(row, col, val, sudokuBoard)) {
+                    sudokuBoard[row][col] = val;
+                    // writeCell(count, val);
+                    if(isBoardComplete(sudokuBoard)) {
+                        return true;
+                    } else {
+                        if(solve(sudokuBoard)) {
+                            return true;
+                        } else {
+                            sudokuBoard[row][col] = 0;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        count++;
+    }
+    return false;
 }
 
 function drawBoardToScreen() {
     let cells = document.getElementsByClassName("invis-cell");
     let cellNumber = 0;
-    for(let i = 0; i < board.length; i++) {
-        for(let j = 0; j < board[0].length; j++) {
-            let id = cells[cellNumber].id;
-            let textField = document.getElementsByTagName("P")[id];
-            textField.innerHTML = board[i][j];
+    for(let i = 0; i < sudokuBoard.length; i++) {
+        for(let j = 0; j < sudokuBoard[i].length; j++) {
+            if(sudokuBoard[i][j] != 0) {
+                let id = cells[cellNumber].id;
+                let textField = document.getElementsByTagName("P")[id];
+                textField.innerHTML = sudokuBoard[i][j];
+            }
             cellNumber += 1;
         }
     }
 }
 
-function printBoard() {
+function printBoard(src) {
     let body = document.getElementsByTagName("BODY")[0];
-    for(let i = 0; i < board.length; i++) {
+    for(let i = 0; i < src.length; i++) {
         let div = document.createElement('div');
-        for(let j = 0; j < board[0].length; j++) {
-            div.innerHTML += board[i][j] + ' ';
+        for(let j = 0; j < src[0].length; j++) {
+            div.innerHTML += src[i][j] + ' ';
             
         }
         div.innerHTML += '\n';
