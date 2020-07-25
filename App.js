@@ -1,5 +1,7 @@
 
 // Globals
+
+/* Complete board with all the numbers */
 let board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -12,15 +14,24 @@ let board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
   ];
 
+/* Board that is shown on screen */
 let sudokuBoard = [];
+
+/* When removing numbers, this variable holds the amount of solutions in the new board */
 let numSolutions = 0;
 
+/* Array that holds all the steps in the backtracking algorithm */
+let backtracking = [];
+
+/* Colors for the board CSS */
 const colors = [
 "baby-blue", "teal", "orange", "purple", "yellow", "green", "turquoise", "pink", "blue"
 ]
 
+/* Holds value of currently clicked cell */
 let currentCellId = null;
 
+/* Draws everything to screen */
 function start() {
     let body = document.getElementById('start');
     let grid = document.createElement('div');
@@ -65,7 +76,7 @@ function start() {
     bodyInvis.appendChild(gridInvis);
 
     let instructions = document.getElementsByClassName('title')[0];
-    let btn = document.createElement('BUTTON'); //creates reset button
+    let btn = document.createElement('BUTTON'); //creates button
     btn.setAttribute("id", "solve");
     btn.addEventListener('click', solveButtonHandler);
     btn.textContent = 'solve';
@@ -75,10 +86,12 @@ function start() {
     generateBoard();
 }
 
+/* REMOVE */
 function test() {
     console.log("test clicked");
 }
 
+/* On click function for cells */
 function cellClicked() {
     if(currentCellId != null) {
         document.getElementById(currentCellId).classList.remove('highlighted');
@@ -90,6 +103,7 @@ function cellClicked() {
     document.addEventListener('keypress', userInput);
 }
 
+/* Handles user input for cells clicked */
 function userInput(e) {
     let textField = document.getElementsByTagName('p')[currentCellId];
     console.log("clicked text " + textField.id);
@@ -126,6 +140,7 @@ function userInput(e) {
 
 }
 
+/* Generates and draws sudoku board to screen */
 function generateBoard() {
     // squareTest();
     generateCompleteBoard();
@@ -135,6 +150,7 @@ function generateBoard() {
     // printBoard(board);
 }
 
+/* Helper function that copies src into dest */
 function copyBoard(src, dest) {
     for(let i = 0; i < src.length; i++) {
         dest.push([]);
@@ -144,12 +160,14 @@ function copyBoard(src, dest) {
     }
 }
 
+/* REMOVE */
 function squareTest() {
     printSquareHTML(copySquare(0, 0, board));
     printSquareHTML(copySquare(0, 3, board));
     printSquareHTML(copySquare(0, 6, board));
 }
 
+/* Helper function that makes a copy of a Square in the sudoku board */
 function copySquare(row, col, src) {
     let squareRow = 0;
     let squareCol = 0;
@@ -169,14 +187,17 @@ function copySquare(row, col, src) {
     return square;
 }
 
+/* Given absolute position, returns row */
 function absToRow(position) {
     return Math.floor(position/9);
 }
 
+/* Given absolute position, returns column */
 function absToCol(position) {
     return position % 9;
 }
 
+/* Checks if adding value to row,col conflicts with board */
 function conflict(row, col, value, src) {
     let square = [];
     if(row < 3) {
@@ -232,6 +253,7 @@ function conflict(row, col, value, src) {
     return false;
 }
 
+/* REMOVE */
 function printCol(row, value) {
     for(let i = 0; i < 9; i++) {
         if(board[row][i] == value)
@@ -239,6 +261,7 @@ function printCol(row, value) {
     }
 }
 
+/* REMOVE */
 function printSquare(square) {
     for(let i = 0; i < square.length; i++) {
         for(let j = 0; j < square[0].length; j++) {
@@ -247,6 +270,7 @@ function printSquare(square) {
     }
 }
 
+/* Generates the complete board with all the numbers */
 function generateCompleteBoard() {
     let available = [];
     for(let i = 0; i < 81; i++) {
@@ -283,6 +307,7 @@ function generateCompleteBoard() {
     }
 }
 
+/* Checks if board is completely filled */
 function isBoardComplete(src) {
     for(let i = 0; i < src.length; i++) {
         for(let j = 0; j < src.length; j++) {
@@ -294,6 +319,7 @@ function isBoardComplete(src) {
     return true;
 }
 
+/* Finds numver of possible solutions of a sudoku board */
 function findNumberOfSolutions(src) {
     if(numSolutions > 1) return true;
     let count = 0;
@@ -323,9 +349,10 @@ function findNumberOfSolutions(src) {
     src[row][col] = 0;
 }
 
+/* Removes numbers on the board */
 function removeBoardCells() {
     let counter = 0;
-    let attempts = 10;
+    let attempts = 2;
     while(attempts > 0) {
         let row = Math.floor((Math.random() * 9));
         let col = Math.floor((Math.random() * 9));
@@ -360,12 +387,29 @@ function writeCell(pos, val) {
     console.log('STUB: write on cell');
 }
 
+
 function solveButtonHandler() {
-    // clearBoardOfUserInput();
     solve();
-    drawBoardToScreen();
+    animateBacktracking();
 }
 
+function animateBacktracking() {
+    for(let i = 0; i < backtracking.length; i++) {
+        setTimeout(() => {
+            let node = backtracking[i];
+            let cell = document.getElementsByTagName('p')[node.pos];
+            if(node.val != 0) {
+                cell.innerHTML = node.val;
+            } else {
+                cell.innerHTML = "";
+            }
+            console.log(backtracking.length - i);
+        }
+        ,  30 * i);
+    }
+}
+
+/* Solves the board */
 function solve() {
     let count = 0;
     let row = 0;
@@ -378,6 +422,7 @@ function solve() {
             for(let val = 1; val < 10; val++) {
                 if(!conflict(row, col, val, sudokuBoard)) {
                     sudokuBoard[row][col] = val;
+                    backtracking.push(new BacktrackingNode(count, val));
                     // writeCell(count, val);
                     if(isBoardComplete(sudokuBoard)) {
                         return true;
@@ -386,6 +431,7 @@ function solve() {
                             return true;
                         } else {
                             sudokuBoard[row][col] = 0;
+                            backtracking.push(new BacktrackingNode(count, 0));
                         }
                     }
                 }
@@ -397,6 +443,7 @@ function solve() {
     return false;
 }
 
+/* Displays board to screen */
 function drawBoardToScreen() {
     let cells = document.getElementsByClassName("invis-cell");
     let cellNumber = 0;
@@ -412,6 +459,7 @@ function drawBoardToScreen() {
     }
 }
 
+/* REMOVE */
 function printBoard(src) {
     let body = document.getElementsByTagName("BODY")[0];
     for(let i = 0; i < src.length; i++) {
@@ -426,6 +474,7 @@ function printBoard(src) {
     
 }
 
+/* REMOVE */
 function printSquareHTML(square) {
     let body = document.getElementsByTagName("BODY")[0];
     for(let i = 0; i < square.length; i++) {
